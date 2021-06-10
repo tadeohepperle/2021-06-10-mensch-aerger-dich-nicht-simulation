@@ -1,0 +1,37 @@
+
+        # check if any pin is still in pos 0, because that has to come out
+        # pinsInPos0 = -1
+        # for pin in range(4):
+        #     pos = self.gs.pinPositions[playerToMove][pin]
+        #     if(pos == 0):
+        #         pinInPos0 = pin
+        # # check if any pin is on pos 1 because that must move
+        # pinInPos1 = -1
+        # for pin in range(4):
+        #     pos = self.gs.pinPositions[playerToMove][pin]
+        #     if(pos == absPos(1)):
+        #         pinInPos1 = pin
+        #         break
+        # # if startposition is blocked:
+        # if(pinInPos0 != -1):
+        #     # check if pin in start can be moved die positions forward:
+        #     posAt1PlusDieIsFree = True
+        #     for pin in range(4):
+        #         pos = self.gs.pinPositions[playerToMove][pin]
+        #         if(pos == absPos(1 + die)):
+        #             posAt1PlusDieIsFree = False
+        #             break
+        #     if(posAt1PlusDieIsFree):
+        #         # it is the only legal move to clear the field 1, so that i
+        #         possibleMoves.append((pinInPos1, absPos(1+die)))
+        #         return possibleMoves
+
+        # for pin in range(4):
+        #     pos = self.gs.pinPositions[playerToMove][pin]
+        #     if(pos < 0):
+        #         continue
+        #     elif(pos == 0 and die == 6):
+        #         # coming Out pin could move to 1
+        #         possibleMoves.append((pin, 1))
+        #         continue
+        #     elif()
