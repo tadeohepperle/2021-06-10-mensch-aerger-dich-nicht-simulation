@@ -45,7 +45,7 @@ class GameState:
                 if (self.pinPositions[player][pin] >= 0):
                     won = False
                     break
-            if(won):
+            if(won and player not in self.winners):
                 self.winners.append(player)
         return len(self.winners)
 
@@ -61,6 +61,12 @@ class GameState:
             if(self.pinPositions[player][pin] > 0):
                 return False
         return True
+
+    def toJsonDict(self):
+        return {
+            "pinPositions": self.pinPositions,
+            "currentPlayer": self.currentPlayer,
+        }
 
 
 class Game:
@@ -89,13 +95,13 @@ class Game:
             if(pos <= 0):
                 return pos
             if(playerToMove == "p1"):
-                return pos
+                pass
             elif(playerToMove == "p2"):
-                return pos - 10
+                pos -= 10
             elif(playerToMove == "p3"):
-                return pos - 20
+                pos -= 20
             elif(playerToMove == "p4"):
-                return pos - 30
+                pos -= 30
             return (pos - 1) % 40 + 1
 
         def absPos(relPos):
@@ -103,13 +109,13 @@ class Game:
             if(relPos <= 0):
                 return relPos
             if(playerToMove == "p1"):
-                return relPos
+                pass
             elif(playerToMove == "p2"):
-                return relPos + 10
+                relPos += 10
             elif(playerToMove == "p3"):
-                return relPos + 20
+                relPos += 20
             elif(playerToMove == "p4"):
-                return relPos + 30
+                relPos += 30
             return (relPos - 1) % 40 + 1
 
         if(die == 6):
@@ -148,7 +154,8 @@ class Game:
             if(pos <= 0):  # cases with 0 are handled only when 6 is rolled (see above) and pins < 0 do not move anymore
                 continue
             relativePos = relPos(pos)
-            if(relativePos + die > 40):
+            if((relativePos + die) > 40):
+                print(1)
                 # would be over one turn, so can only go inside heaven:
                 potentialPos = -(relativePos + die - 40)  # is a minus pos
                 # check if free:
@@ -161,7 +168,9 @@ class Game:
                 if(potentialPosIsFree):
                     possibleMoves.append((pin, potentialPos))
             else:
-                potentialPos = pos + die
+                print(2)
+                potentialPos = absPos(relativePos + die)
+                print(potentialPos)
                 potentialPosIsFree = True
                 for pin2 in range(4):
                     pos2 = self.gs.pinPositions[playerToMove][pin2]
@@ -206,7 +215,8 @@ class Game:
             enemies.remove(currentPlayer)
             for e in enemies:
                 for enemyPin in range(4):
-                    if(newGameState.pinPositions[e][enemyPin] == posToMoveTo):
+                    # cant kick out of end fields
+                    if(newGameState.pinPositions[e][enemyPin] == posToMoveTo and posToMoveTo > 0):
                         newGameState.pinPositions[e][enemyPin] = 0
             # set pin moved to new position:
             newGameState.pinPositions[currentPlayer][pinToMove] = posToMoveTo
@@ -217,6 +227,7 @@ class Game:
         # put this in turn or in turn loop???
         numberOfPlayersWon = self.gs.checkWinCondition()
         if(numberOfPlayersWon >= 3):
+            print("endgame")
             self.endGame()
         print(self.gs)
 
@@ -230,7 +241,7 @@ class Game:
             nextPlayer = currentPlayer
             while(skipPlayers < 4):
                 nextPlayer = {"p1": "p2", "p2": "p3",
-                              "p3": "p4", "p4": "p1"}[currentPlayer]
+                              "p3": "p4", "p4": "p1"}[nextPlayer]
                 if(not (nextPlayer in self.gs.winners)):
                     return nextPlayer
                 skipPlayers += 1
@@ -247,15 +258,16 @@ class Game:
 
     def startGame(self, interactive):
         print(self.gs)
-        # while(not self.ended):
-        #     if(interactive):
-        #         x = input()
-        #     self.simulateTurn()
-        self.writeGameHistoryToFile("./gameData.json")
+        while(not self.ended):
+            if(interactive):
+                x = input()
+            self.simulateTurn()
+        self.writeGameHistoryToFile("./data/gameData.json")
 
     def writeGameHistoryToFile(self, filepath):
         with open(filepath, 'w') as outfile:
-            json.dump(self.historyOfGameStates, outfile)
+            AsJSONList = [_.toJsonDict() for _ in self.historyOfGameStates]
+            json.dump(AsJSONList, outfile)
 
 
 class Agent:
@@ -271,4 +283,4 @@ class Agent:
 
 
 game = Game()
-game.startGame(True)
+game.startGame(False)
