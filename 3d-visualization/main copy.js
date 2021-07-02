@@ -3,7 +3,7 @@ import * as UTIL from "./src/utilities";
 import * as THREE from "three";
 
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { generateGameFieldWithBasesAndAddToScene } from "./src/modelGeneration";
+
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
   75,
@@ -46,4 +46,28 @@ const controls = new OrbitControls(camera, renderer.domElement);
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 
-generateGameFieldWithBasesAndAddToScene(scene);
+const bases = []; // object that keeps track of all bases objects in the game.
+function createBase(x, z, color) {
+  const mat = new THREE.MeshStandardMaterial({ color });
+  const geom = new THREE.CylinderGeometry(0.75, 0.75, 5, 64);
+  const mesh = new THREE.Mesh(geom, mat);
+  mesh.position.z = z;
+  mesh.position.x = x;
+  return;
+}
+
+function addBasicGameField(scene) {
+  const geometry = new THREE.BoxGeometry(22, 2, 22);
+  const meshMaterial = new THREE.MeshStandardMaterial({ color: 0xff63f7 });
+  const ground = new THREE.Mesh(geometry, meshMaterial);
+  scene.add(ground);
+  let b = createBase(3, 4, 0x4587ee);
+
+  scene.add(b);
+  b;
+  // add round bases on ground
+}
+
+addBasicGameField(scene);
+
+console.log();

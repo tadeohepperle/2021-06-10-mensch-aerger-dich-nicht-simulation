@@ -1,7 +1,5 @@
-export const hallo = "HALSALASP A S ASIKAS";
-
 // fields have int coordinates from -5 to 5
-function mapNumericFieldValueToPositionXZ(number, player, pin) {
+export function mapNumericFieldValueToPositionXZ(number, player, pin) {
   if (number < -4 || number > 40) {
     return null;
     console.error(
@@ -116,4 +114,23 @@ function mapNumericFieldValueToPositionXZ(number, player, pin) {
 
   // const transformPosition = (position) => [position.x * 2, position.z * 2];
   // return [0, 0];
+}
+
+export function mapPlayerToColor(player) {
+  switch (player) {
+    case "p1":
+      return 0xffffff;
+    case "p2":
+      return 0xff0000;
+    case "p3":
+      return 0x00ff00;
+    case "p4":
+      return 0x0000ff;
+    default:
+      return 0x000000;
+  }
+}
+
+export function lightenColor(color) {
+  return color;
 }
