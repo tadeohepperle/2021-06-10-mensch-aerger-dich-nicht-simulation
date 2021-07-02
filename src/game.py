@@ -1,4 +1,6 @@
 import json
+
+from datetime import datetime
 from random import randrange
 """
 
@@ -67,6 +69,9 @@ class GameState:
             "pinPositions": self.pinPositions,
             "currentPlayer": self.currentPlayer,
         }
+
+    def __dict__(self):
+        return {"pinPositions": self.pinPositions, "currentPlayer": self.currentPlayer, "gameOver": self.gameOver, "winners": self.winners, "turn": self.turn}
 
 
 class Game:
@@ -160,6 +165,9 @@ class Game:
                 potentialPos = -(relativePos + die - 40)  # is a minus pos
                 # check if free:
                 potentialPosIsFree = True
+                # avoid -6 and -5
+                if(potentialPos <= -5):
+                    potentialPosIsFree = False
                 for pin2 in range(4):
                     pos2 = self.gs.pinPositions[playerToMove][pin2]
                     if(pos2 == potentialPos):
@@ -229,6 +237,7 @@ class Game:
         if(numberOfPlayersWon >= 3):
             print("endgame")
             self.endGame()
+            return
         print(self.gs)
 
     def determineNextPlayer(self, die, usedAll3Rolls):
@@ -250,6 +259,7 @@ class Game:
     def endGame(self):
         self.ended = True
         print(f"Game Ended. Winners: {str(self.gs.winners)}")
+        self.saveToFile()
 
     def applyNewGameState(self, newGameState):
         self.historyOfGameStates.append(self.gs)
@@ -268,6 +278,20 @@ class Game:
         with open(filepath, 'w') as outfile:
             AsJSONList = [_.toJsonDict() for _ in self.historyOfGameStates]
             json.dump(AsJSONList, outfile)
+
+    def __dict__(self):
+        jsonObj = {"winners": self.gs.winners,
+                   "history": list(map(lambda gs: gs.__dict__(), self.historyOfGameStates))}
+        jsonObjAsString = json.dumps(jsonObj)
+        return jsonObjAsString
+
+    def saveToFile(self):
+        jsonObjAsString = self.__dict__()
+        filename = "game_" + datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + ".json"
+        print(filename)
+        myfile = open(f"./data/{filename}", 'w')
+        myfile.write(jsonObjAsString)
+        myfile.close()
 
 
 class Agent:

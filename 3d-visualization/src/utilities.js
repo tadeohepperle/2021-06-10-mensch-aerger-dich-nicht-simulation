@@ -16,10 +16,10 @@ export function mapNumericFieldValueToPositionXZ(number, player, pin) {
         posX += 9;
         break;
       case "p3":
+        posX += 9;
         posZ += 9;
         break;
       case "p4":
-        posX += 9;
         posZ += 9;
         break;
     }
@@ -28,30 +28,33 @@ export function mapNumericFieldValueToPositionXZ(number, player, pin) {
         break;
       case 1:
         posX += 1;
+        break;
       case 2:
         posZ += 1;
-      case 2:
+        break;
+      case 3:
         posX += 1;
         posZ += 1;
+        break;
     }
     return { posX, posZ };
   } else if (number < 0) {
     let directionX = 1;
-    let directionY = 0;
+    let directionZ = 0;
     switch (player) {
       case "p1":
         break;
       case "p2":
         directionX = 0;
-        directionY = 1;
+        directionZ = 1;
         break;
       case "p3":
         directionX = -1;
-        directionY = 0;
+        directionZ = 0;
         break;
       case "p4":
-        directionX = -1;
-        directionY = 1;
+        directionX = 0;
+        directionZ = -1;
         break;
     }
     let posX = 0,
@@ -116,21 +119,47 @@ export function mapNumericFieldValueToPositionXZ(number, player, pin) {
   // return [0, 0];
 }
 
-export function mapPlayerToColor(player) {
-  switch (player) {
-    case "p1":
-      return 0xffffff;
-    case "p2":
-      return 0xff0000;
-    case "p3":
-      return 0x00ff00;
-    case "p4":
-      return 0x0000ff;
-    default:
-      return 0x000000;
+export function mapBaseToColor(number, player, pin) {
+  if (player != null) return mapPlayerToColor(player);
+  else {
+    const players = ["p1", "p2", "p3", "p4"];
+    if (number % 10 == 1)
+      return mapPlayerToColor(players[Math.floor(number / 10)]);
+    else return DEFAULTCOLOR;
   }
 }
 
+export function mapPlayerToColor(player) {
+  switch (player) {
+    case "p1":
+      return 0xff3624;
+    case "p2":
+      return 0x30d94f;
+    case "p3":
+      return 0x36a5f5;
+    case "p4":
+      return 0xba5fe8;
+    default:
+      return DEFAULTCOLOR;
+  }
+}
+const DEFAULTCOLOR = 0xbfbfbf;
+
 export function lightenColor(color) {
   return color;
+}
+
+/**
+ * @param {vec3} position_Origin
+ * @param {vec3} position_Destination
+ * @param {float} value between 0 and 1
+ * @returns {vec3} interpolation
+ */
+export function lerp3D([x1, y1, z1], [x2, y2, z2], value) {
+  let value_inv = 1 - value;
+  return [
+    x1 * value_inv + x2 * value,
+    y1 * value_inv + y2 * value,
+    z1 * value_inv + z2 * value,
+  ];
 }

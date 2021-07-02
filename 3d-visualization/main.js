@@ -1,9 +1,17 @@
 import "./style.css";
 import * as UTIL from "./src/utilities";
 import * as THREE from "three";
+import {
+  generateGameFieldWithBasesAndAddToScene,
+  addHelpers,
+  addControls,
+  addPinModel,
+} from "./src/modelGeneration";
 
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { generateGameFieldWithBasesAndAddToScene } from "./src/modelGeneration";
+import { GameSimulator } from "./src/gameSimulator";
+/////////////////////////////////////////////////
+// SETUP CAM AND RENDERER
+/////////////////////////////////////////////////
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
   75,
@@ -11,39 +19,39 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
-
 const renderer = new THREE.WebGLRenderer({
   canvas: document.querySelector("#canvas3d"),
 });
-
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 camera.position.setZ(30);
-
 renderer.render(scene, camera);
-console.log("render");
-
 function animate() {
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
 }
 animate();
+window.onresize = () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+};
 
-function addHelpers(scene) {
-  const pointLight = new THREE.PointLight(0xffffff);
-  pointLight.position.set(10, 5, 0);
-  const ambientLight = new THREE.AmbientLight(0xffffff);
-  scene.add(pointLight, ambientLight);
-  const lightHelper = new THREE.PointLightHelper(pointLight);
-  scene.add(lightHelper);
-  const gridHelper = new THREE.GridHelper(200, 50);
-  scene.add(gridHelper);
-}
+/////////////////////////////////////////////////
+// ADD STUFF TO SCENE
+/////////////////////////////////////////////////
 addHelpers(scene);
-const controls = new OrbitControls(camera, renderer.domElement);
+addControls(camera, renderer);
 
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 
-generateGameFieldWithBasesAndAddToScene(scene);
+async function run() {
+  const gameSimulator = new GameSimulator(scene, camera, renderer);
+  await gameSimulator.setup();
+  await gameSimulator.loadInGameData("./data/game_2021.json");
+  await gameSimulator.runGame();
+}
+
+run();
