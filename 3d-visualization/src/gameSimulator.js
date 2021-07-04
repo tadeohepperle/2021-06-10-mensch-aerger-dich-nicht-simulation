@@ -29,8 +29,8 @@ const EXAMPLE_PIN_POSITIONS2 = {
   p3: [-3, -2, -1, -4],
   p4: [-3, -1, -2, -4],
 };
-const FRAMES_PER_STEP = 20;
-const TIME_PER_STEP = 200;
+const FRAMES_PER_STEP = 3;
+const TIME_PER_STEP = 5;
 
 export class GameSimulator {
   constructor(scene, camera, renderer) {
@@ -65,7 +65,7 @@ export class GameSimulator {
         history[i].pinPositions,
         history[i + 1].pinPositions
       );
-      await waitPromise(TIME_PER_STEP);
+      // await waitPromise(TIME_PER_STEP);
     }
   }
 

@@ -18,7 +18,7 @@ export function addHelpers(scene) {
   scene.add(gridHelper);
 }
 
-export function addControls(camera, renderer, damping = false) {
+export function addControls(camera, renderer, damping) {
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = damping;
   controls.dampingFactor = 0.3;

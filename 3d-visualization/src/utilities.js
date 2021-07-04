@@ -165,6 +165,16 @@ export function lerp3D([x1, y1, z1], [x2, y2, z2], value) {
   ];
 }
 
+export function lerp3Dparabola([x1, y1, z1], [x2, y2, z2], value) {
+  let value_inv = 1 - value;
+  let yOnTop = -((value - 0.5) ** 2) * 20 + 5;
+  return [
+    x1 * value_inv + x2 * value,
+    y1 * value_inv + y2 * value + yOnTop,
+    z1 * value_inv + z2 * value,
+  ];
+}
+
 export function pathFromNumberToNumber(num1, num2, player) {
   if (num1 == num2) return [num1, num2];
   if (num2 == 0) return [num1, num2];
@@ -242,14 +252,27 @@ export function getAnimationStepsObjectsForMove(
       pathStartPos3d: get3dPinPosFromNumPlayerPin(from, player, pin),
       pathEndPos3d: get3dPinPosFromNumPlayerPin(to, player, pin),
     };
-    let path = Array(FRAMES_PER_STEP).fill(null);
-    for (let i = 0; i < FRAMES_PER_STEP; i++) {
-      let pos3d = lerp3D(
-        stepObj.pathStartPos3d,
-        stepObj.pathEndPos3d,
-        (i + 1) / FRAMES_PER_STEP
-      );
-      path[i] = pos3d;
+
+    const startFieldInvolved = stepObj.numOri == 0 || stepObj.numDest == 0;
+    const FRAMES = startFieldInvolved ? FRAMES_PER_STEP * 4 : FRAMES_PER_STEP;
+    let path = Array(FRAMES).fill(null);
+    for (let i = 0; i < FRAMES; i++) {
+      if (numDest == 0) {
+        // send back to base, make parabola flight
+        let pos3d = lerp3Dparabola(
+          stepObj.pathStartPos3d,
+          stepObj.pathEndPos3d,
+          (i + 1) / FRAMES
+        );
+        path[i] = pos3d;
+      } else {
+        let pos3d = lerp3D(
+          stepObj.pathStartPos3d,
+          stepObj.pathEndPos3d,
+          (i + 1) / FRAMES
+        );
+        path[i] = pos3d;
+      }
     }
     stepObj.path = path;
     stepsArray.push(stepObj);
