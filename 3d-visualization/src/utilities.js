@@ -1,4 +1,5 @@
 // fields have int coordinates from -5 to 5
+export const DEFAULT_Y_POS_OF_PLAYER_PINS = 1.65;
 export function mapNumericFieldValueToPositionXZ(number, player, pin) {
   if (number < -4 || number > 40) {
     return null;
@@ -163,3 +164,103 @@ export function lerp3D([x1, y1, z1], [x2, y2, z2], value) {
     z1 * value_inv + z2 * value,
   ];
 }
+
+export function pathFromNumberToNumber(num1, num2, player) {
+  if (num1 == num2) return [num1, num2];
+  if (num2 == 0) return [num1, num2];
+  else {
+    let lastNumForPlayer = getLastNumForPlayer(player);
+    let path = [num1];
+    while (true) {
+      if (num1 == 0) {
+        num1 = getStartNumForPlayer(player);
+      } else if (num1 == lastNumForPlayer && num2 < 0) {
+        num1 = -1;
+      } else if (num1 < 0) {
+        num1 -= 1;
+      } else {
+        num1 += 1;
+        if (num1 >= 41) num1 = 1;
+      }
+      path.push(num1);
+      if (num1 == num2) break;
+    }
+    return path;
+  }
+}
+
+export function getLastNumForPlayer(player) {
+  switch (player) {
+    case "p1":
+      return 40;
+    case "p2":
+      return 10;
+    case "p3":
+      return 20;
+    case "p4":
+      return 30;
+  }
+  throw new Error(`invalid player: ${player}`);
+}
+
+export function getStartNumForPlayer(player) {
+  switch (player) {
+    case "p1":
+      return 1;
+    case "p2":
+      return 11;
+    case "p3":
+      return 21;
+    case "p4":
+      return 31;
+  }
+  throw new Error(`invalid player: ${player}`);
+}
+
+export function get3dPinPosFromNumPlayerPin(num, player, pin) {
+  const { posX, posZ } = mapNumericFieldValueToPositionXZ(num, player, pin);
+  return [posX, DEFAULT_Y_POS_OF_PLAYER_PINS, posZ];
+}
+
+export function getAnimationStepsObjectsForMove(
+  numOri,
+  numDest,
+  player,
+  pin,
+  FRAMES_PER_STEP
+) {
+  let numPath = pathFromNumberToNumber(numOri, numDest, player);
+  let stepsArray = [];
+  for (let i = 0; i < numPath.length - 1; i++) {
+    let from = numPath[i];
+    let to = numPath[i + 1];
+    let stepObj = {
+      numOri: from,
+      numDest: to,
+      player,
+      pin,
+      pathStartPos3d: get3dPinPosFromNumPlayerPin(from, player, pin),
+      pathEndPos3d: get3dPinPosFromNumPlayerPin(to, player, pin),
+    };
+    let path = Array(FRAMES_PER_STEP).fill(null);
+    for (let i = 0; i < FRAMES_PER_STEP; i++) {
+      let pos3d = lerp3D(
+        stepObj.pathStartPos3d,
+        stepObj.pathEndPos3d,
+        (i + 1) / FRAMES_PER_STEP
+      );
+      path[i] = pos3d;
+    }
+    stepObj.path = path;
+    stepsArray.push(stepObj);
+  }
+  return stepsArray;
+}
+
+export const waitPromise = (ms) => {
+  return new Promise((res, rej) => {
+    setTimeout(() => {
+      res();
+    }, ms);
+  });
+};
